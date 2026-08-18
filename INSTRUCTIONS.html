@@ -1,0 +1,184 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>WaiveFast — One‑page PDF Instructions</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <style>
+    body{font-family:Arial,Helvetica,sans-serif;line-height:1.4;margin:28px;max-width:900px}
+    h1{font-size:28px}
+    h2{font-size:20px;margin-top:20px}
+    p{font-size:16px}
+    pre{background:#f6f6f6;padding:12px;border:1px solid #eee;overflow:auto}
+    .step{background:#eef;padding:10px;border-left:4px solid #88f;margin:10px 0}
+    .small{font-size:13px;color:#444}
+    .bold{font-weight:bold}
+  </style>
+</head>
+<body>
+  <h1>WaiveFast — Everything you need (one page to save as PDF)</h1>
+  <p class="small">This file contains the exact steps and code to finish setup. Save it to your laptop and print to PDF or hand it to someone to run. If you want me to finish edits in the repo, paste the Google Apps Script Web App URL back into chat and say "Paste into repo".</p>
+
+  <h2>Which device to use</h2>
+  <p class="step">Use a laptop or desktop computer (Windows or Mac). If you don't have one, give this file to a friend and ask them to follow it.</p>
+
+  <h2>Quick summary — three things we need from you</h2>
+  <ol>
+    <li>Make the Google Apps Script Web App (one-time clicks) — section A below</li>
+    <li>Copy the Web App URL here or let me paste it into the site for you</li>
+    <li>Open the live site and test one upload</li>
+  </ol>
+
+  <h2>A. Create and deploy the Google Apps Script (do this on a laptop)</h2>
+  <p class="step"><strong>Follow these exact clicks. Read each line and do it.</strong></p>
+  <ol>
+    <li>Open a browser and go to <a href="https://sheets.google.com">https://sheets.google.com</a>. Sign in with the Gmail account you want to send emails from.</li>
+    <li>Click the big <strong>+</strong> Blank to make a new Sheet. At the top-left change the name to: <strong>WaiveFast Leads</strong>.</li>
+    <li>Click the top menu: <strong>Extensions</strong> → <strong>Apps Script</strong>.</li>
+    <li>In the Apps Script page click inside the big code box, press <kbd>Ctrl</kbd>+<kbd>A</kbd> (or Cmd+A), then <kbd>Delete</kbd> to clear it.</li>
+    <li>Copy the code from the "Apps Script code" section below and paste it into the empty editor.</li>
+    <li>Click the Save icon (top-left). When asked to name the project, type: <strong>WaiveFastMailer</strong> and press Enter.</li>
+    <li>Click <strong>Deploy</strong> (top-right) → <strong>New deployment</strong>.</li>
+    <li>In the dialog choose <strong>Web app</strong> as the type.</li>
+    <li>Fill fields: Description = <em>WaiveFast web endpoint</em>. Execute as = <strong>Me</strong>. Who has access = <strong>Anyone</strong> (or the most permissive option available).</li>
+    <li>Click <strong>Deploy</strong>.</li>
+    <li>A permissions popup appears. Click <strong>Continue</strong>. Choose your Google account. If you see "This app isn't verified" click <strong>Advanced</strong> → <strong>Go to WaiveFastMailer (unsafe)</strong> → <strong>Allow</strong>.</li>
+    <li>After it finishes you will see <strong>Web app URL</strong>. Click the copy icon to copy it. It looks like <code>https://script.google.com/macros/s/XXXX/exec</code>.</li>
+    <li>Come back to this chat and paste that Web App URL, or follow section B to paste it yourself into the site file.</li>
+  </ol>
+
+  <h2>B. If you want me to edit the site for you</h2>
+  <p class="step">Paste the Web App URL you copied into this chat and write: <strong>Paste into repo</strong>. I will edit index.html in your repo and complete the setup. That's the easiest option.</p>
+
+  <h2>C. If you prefer to paste the Web App URL yourself into GitHub (one tiny edit)</h2>
+  <ol>
+    <li>Open this repo page: <a href="https://github.com/vandleis/waivefast-demo">https://github.com/vandleis/waivefast-demo</a> and sign in to GitHub if needed.</li>
+    <li>Click the file <strong>index.html</strong> in the file list.</li>
+    <li>Click the pencil icon (Edit this file).</li>
+    <li>Find this line near the top of the file:
+      <pre>APPS_SCRIPT_WEBAPP_URL: "https://script.google.com/macros/s/PASTE_YOUR_APPS_SCRIPT_URL_HERE/exec"</pre>
+      Replace the part between the quotes with the Web App URL you copied from Apps Script.
+    </li>
+    <li>Scroll down and click <strong>Commit changes</strong> (Commit directly to the main branch) → Commit changes.</li>
+  </ol>
+
+  <h2>D. Turn on GitHub Pages (if not already on) and test the site</h2>
+  <ol>
+    <li>In the same repo, click <strong>Settings</strong> → <strong>Pages</strong> in the left menu.</li>
+    <li>Under Source choose: <strong>Branch: main</strong>, folder: <strong>/ (root)</strong> → Click <strong>Save</strong>.</li>
+    <li>Wait 1–2 minutes. GitHub will show the site URL (example: <em>https://your-username.github.io/waivefast-demo/</em>).</li>
+    <li>Open the site URL in a browser. Fill the form with your name, phone, and the same Gmail you used in Apps Script for the email field. Upload any invoice image and click <strong>Generate waiver & send</strong>.</li>
+    <li>A PDF will download. Check the Gmail inbox — you should receive the confirmation email with the Stripe payment link.</li>
+  </ol>
+
+  <h2>E. If you get stuck — what to tell me</h2>
+  <p class="small">Tell me the step letter (A, B, C, or D) and the exact line of text or error you see on the screen. Example: "Step A.10 says 'You need permission'" — I will respond with the next single click to fix it.</p>
+
+  <h2>Apps Script code (copy everything below exactly)</h2>
+  <pre>// Apps Script: Receives POSTs from the static site and runs an email sequence.
+// Deploy as Web App -> New deployment -> Web app.
+// Authorize Gmail send when prompted.
+
+const SHEET_NAME = 'Leads';
+const FOLLOWUP_DAYS = [0,2,4,7]; // Day offsets for sends
+
+function doPost(e) {
+  try {
+    const payload = JSON.parse(e.postData.contents);
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    let sheet = ss.getSheetByName(SHEET_NAME);
+    if (!sheet) {
+      sheet = ss.insertSheet(SHEET_NAME);
+      sheet.appendRow(['timestamp','name','phone','email','state','invoice_number','total','job_address','raw_text','stripe_link','status','last_sent','next_send_index']);
+    }
+    const row = [
+      payload.timestamp || new Date().toISOString(),
+      payload.submitter.name || '',
+      payload.submitter.phone || '',
+      payload.submitter.email || '',
+      payload.state || '',
+      payload.invoiceData.invoice_number || '',
+      payload.invoiceData.total || '',
+      payload.invoiceData.job_address || '',
+      payload.invoiceData.raw || '',
+      payload.stripe_link || '',
+      'new',
+      '',
+      0
+    ];
+    sheet.appendRow(row);
+    // send immediate email (Day 0)
+    sendEmailForRow(sheet, sheet.getLastRow());
+    return ContentService.createTextOutput(JSON.stringify({ok:true, row: sheet.getLastRow()})).setMimeType(ContentService.MimeType.JSON);
+  } catch (err) {
+    return ContentService.createTextOutput(JSON.stringify({ok:false, error:err.message})).setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+function sendEmailForRow(sheet, rowNumber) {
+  const row = sheet.getRange(rowNumber,1,1,sheet.getLastColumn()).getValues()[0];
+  const headers = sheet.getRange(1,1,1,sheet.getLastColumn()).getValues()[0];
+  const obj = {};
+  headers.forEach((h,i)=> obj[h] = row[i]);
+  const to = obj['email'];
+  const firstName = (obj['name'] || '').split(' ')[0] || '';
+  const stripeLink = obj['stripe_link'] || '';
+  const personalizedLine = `Hi ${firstName}, I can turn an invoice photo into a state-compliant lien waiver and a payment link so you get paid faster. First 20 waivers free.`;
+  const subject = 'Get paid faster — first 20 waivers free';
+  const body = `${personalizedLine}\n\nI generated a waiver for your invoice. Download the PDF you received and use this link for faster payments: ${stripeLink}\n\nReply to this email or call/text ${obj['phone']} to start the pilot.\n\n— WaiveFast`;
+  if (to && to.includes('@')) {
+    GmailApp.sendEmail(to, subject, body, {name: "WaiveFast"});
+    sheet.getRange(rowNumber, headers.indexOf('status')+1).setValue('emailed');
+    sheet.getRange(rowNumber, headers.indexOf('last_sent')+1).setValue(new Date().toISOString());
+    sheet.getRange(rowNumber, headers.indexOf('next_send_index')+1).setValue(1);
+  }
+}
+
+function processFollowups() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const sheet = ss.getSheetByName(SHEET_NAME);
+  if (!sheet) return;
+  const headers = sheet.getRange(1,1,1,sheet.getLastColumn()).getValues()[0];
+  const rows = sheet.getRange(2,1,sheet.getLastRow()-1,sheet.getLastColumn()).getValues();
+  rows.forEach((row, idx) => {
+    const rnum = idx+2;
+    const obj = {};
+    headers.forEach((h,i)=> obj[h] = row[i]);
+    let nextIndex = Number(obj['next_send_index'] || 0);
+    if (nextIndex >= FOLLOWUP_DAYS.length) return;
+    const created = new Date(obj['timestamp']);
+    const sendDate = new Date(created);
+    sendDate.setDate(sendDate.getDate() + FOLLOWUP_DAYS[nextIndex]);
+    if (new Date() >= sendDate) {
+      const to = obj['email'];
+      if (to && to.includes('@')) {
+        const firstName = (obj['name'] || '').split(' ')[0] || '';
+        const subject = nextIndex === 0 ? 'Get paid faster — first 20 waivers free' : `Quick follow-up — ${firstName}, can we run your first waiver?`;
+        const body = `Hi ${firstName || ''},\n\nJust following up on our offer to process your first 20 waivers free and show how much faster you can get paid. Use this link to pay for fast processing (optional): ${obj['stripe_link'] || ''}\n\nReply to this message or call/text ${obj['phone']}.\n\n— WaiveFast`;
+        GmailApp.sendEmail(to, subject, body, {name: "WaiveFast"});
+        sheet.getRange(rnum, headers.indexOf('last_sent')+1).setValue(new Date().toISOString());
+        sheet.getRange(rnum, headers.indexOf('next_send_index')+1).setValue(nextIndex+1);
+      }
+    }
+  });
+}
+</pre>
+
+  <h2>Where the website and files live</h2>
+  <p class="small">I added all site files to your GitHub repo: <a href="https://github.com/vandleis/waivefast-demo">https://github.com/vandleis/waivefast-demo</a></p>
+  <p class="small">Files already in the repo: <strong>index.html</strong>, <strong>AppsScriptMailer.gs</strong>, <strong>leads_sample.csv</strong>, <strong>README.md</strong>.</p>
+
+  <h2>How to save this page as a PDF (on your laptop)</h2>
+  <ol>
+    <li>Open this file in your browser from GitHub: <a href="https://github.com/vandleis/waivefast-demo/blob/main/INSTRUCTIONS.html">INSTRUCTIONS.html on GitHub</a>.</li>
+    <li>Click the <strong>Raw</strong> button to open the plain HTML page (top-right of the file view).</li>
+    <li>Once the plain page is open, press <kbd>Ctrl</kbd>+<kbd>P</kbd> (or Cmd+P on Mac) to open Print.</li>
+    <li>In the Destination/Printer choose <strong>Save as PDF</strong> and click <strong>Save</strong>. Pick a location on your laptop to save the PDF.</li>
+  </ol>
+
+  <h2>If you want me to finish the GitHub edit for you</h2>
+  <p class="step">Paste the Web App URL from Apps Script into this chat and type <strong>Paste into repo</strong>. I will update index.html with the URL and tell you the live site address to test.</p>
+
+  <p class="small">If anything is confusing at all, tell me the exact step letter (A,B,C,D) and the line you see and I will give one single-click instruction to fix it. I'm standing by to finish as soon as you paste the Web App URL or say "I want help printing this PDF".</p>
+</body>
+</html>
