@@ -1,0 +1,16 @@
+# WaiveFast Demo
+
+This repo contains the WaiveFast demo landing page and supporting files for the free-tier pilot.
+
+What is included:
+- index.html — static site (GitHub Pages) with in-browser OCR and PDF generation
+- AppsScriptMailer.gs — Google Apps Script to receive leads and send emails (paste into Google Sheets → Extensions → Apps Script)
+- leads_sample.csv — sample leads to import into Google Sheets
+
+Quick deploy steps (for the repo owner):
+1. In the repo, go to Settings → Pages and set source to branch `main` and folder `/` (root). Save.
+2. Create a Google Sheet, open Extensions → Apps Script, paste AppsScriptMailer.gs and Deploy → New deployment → Web app → Execute as: Me, Who has access: Anyone. Authorize Gmail send.
+3. Copy the Web App URL and edit index.html in this repo to replace the APPS_SCRIPT_WEBAPP_URL placeholder with the URL.
+4. Open the GitHub Pages site URL shown in Settings to test uploads.
+
+If you want me to finish the Apps Script deploy or run a seeded send, reply here and I will guide you through the one-time authorization click.
