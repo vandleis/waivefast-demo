@@ -1,0 +1,11 @@
+first_name,company,trade,city,state,phone,email,source,notes
+John,Acme Roofing,roofing,Austin,TX,512-555-0101,john@acmeroof.com,Google Maps,5-star review Aug
+Mike,BlueLine Plumbing,plumbing,Dallas,TX,214-555-0102,mike@bluelineplumb.com,Google Maps,small crew
+Sara,Sunset Electric,electrical,Orlando,FL,407-555-0103,sara@sunsetelec.com,Google Maps,service area: east Orlando
+Luis,TopFinish Drywall,drywall,Miami,FL,305-555-0104,luis@topfinish.com,Google Maps,high-volume remodels
+Carlos,Prime Painting,painting,Houston,TX,713-555-0105,carlos@primepaint.com,Yelp,owner runs crews
+Amy,QuickSite Concrete,concrete,San Antonio,TX,210-555-0106,amy@quicksite.com,Local FB,smaller jobs
+David,Metro Framers,framing,Jacksonville,FL,904-555-0107,david@metroframers.com,Google Maps,commercial focus
+Tim,Alpha Drywall,drywall,Tampa,FL,813-555-0108,tim@alphadry.com,Local business directory,established 10+yrs
+Greg,Elite Roofing,roofing,Austin,TX,512-555-0109,greg@eliteroof.com,Local supplier,regular buyer
+Rob,City Electrical,electrical,Dallas,TX,214-555-0110,rob@cityelec.com,SerpAPI,small GC sub
